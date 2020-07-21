@@ -38,17 +38,11 @@ https://data.sfgov.org/Housing-and-Buildings/Assessor-Historical-Secured-Propert
 https://www.zillow.com/research/data/
 This is a project for UpWork
 '''
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options 
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.keys import Keys
 import pandas as pd
 import requests
 import csv
 import datetime
+import scrapy
 
 outputDF = pd.DataFrame()
 addressList = []
@@ -162,7 +156,7 @@ class SLAuto:
 
 
 if __name__ == "__main__":
-    dataSFPath = '/Users/ethanherring/Desktop/Assessor_Historical_Secured_Property_Tax_Rolls.csv'
+    dataSFPath = 'Assessor_Historical_Secured_Property_Tax_Rolls.csv'
     p = readData(dataSFPath)
     dataSF = p.getSFData(dataSFPath)
     print("length of addresses before filter: ", len(dataSF['Parcel Number']))
