@@ -1,5 +1,7 @@
-#Ethan Herring 05/21/2020
-'''Objective: 
+'''
+This project was initially a project for an UpWork Client that never contacted me to actually complete.
+Ethan Herring 05/21/2020
+Objective: 
 Create a database of historical real estate transaction data
 Desired dataset:
 • All historical transaction records (1985-2020)
@@ -38,11 +40,11 @@ https://data.sfgov.org/Housing-and-Buildings/Assessor-Historical-Secured-Propert
 https://www.zillow.com/research/data/
 This is a project for UpWork
 '''
+import scrapy
 import pandas as pd
 import requests
 import csv
 import datetime
-import scrapy
 
 outputDF = pd.DataFrame()
 addressList = []
@@ -75,6 +77,18 @@ class Conversions:
         print("length of addresses after filter: ", len(dataSF['Parcel Number']))
         return inputDF
 
+class inputParcelsSpider(scrapy.Spider):
+    name = 'parcelInfo'
+    start_urls = ['https://sfplanninggis.org/PIM/']
+
+
+    def parse(self, response):
+        address = selector.xpath('//*[@id="Report_DynamicContent_Property"]/div[1]/div[2]/div/div[2]/div[3]/span[1]//text()').extract()
+        zipInput = selector.xpath('/html/body/div/div[2]/div[9]/div[3]/div[2]/div[3]/span/div[1]/div[2]/div/div[2]/div[3]//text()').extract()
+
+
+
+
 class SLAuto:
     def __init__(self, frame):
         self.frame = frame
@@ -82,11 +96,6 @@ class SLAuto:
     def automateWeb(self, frame):
         #plug in parcel numbers to sfplanninggis.org/PIM/ to get other data (sale price, year built, street address)
         sfplanningURL = 'https://sfplanninggis.org/PIM/'
-        options = Options()
-        #options.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
-        options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        driver_path = '/usr/local/bin/chromedriver'
-        driver = webdriver.Chrome(options = options, executable_path= driver_path)
 
         adList = []
         yearBList = []
@@ -97,27 +106,15 @@ class SLAuto:
         mlsNmbLst = []
 
         for x in frame['Parcel Number']:
-            driver.get(sfplanningURL)
-            searchBar = driver.find_element_by_id("addressInput")
-            #searchBar = driver.find_element_by_class_name("Header-Search-field")
-            searchBar.send_keys(str(x))
-            #searchBar = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, "Header-Search-field disabledDIV")))
-            #searchBar.send_keys(Keys.RETURN)
-            #searchBar = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CLASS_NAME, "Header-Search-field")))
-            #searchBar.send_keys(Keys.ENTER)
-            icon = driver.find_element_by_id('Search-icon')
-            icon.click()
-            #WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'Search-icon'))).click()
-            #searchIcon = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "Search-icon")))
-            #searchIcon.click()
-            #WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'Search-icon'))).click()
-            address = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="Report_DynamicContent_Property"]/div[1]/div[2]/div/div[2]/div[3]/span[1]'))).text
+            #Call in Scrapy Spider to get Website data
+           
             adList.append(address)
             print(address)
-            zipInput = driver.find_element_by_xpath('/html/body/div/div[2]/div[9]/div[3]/div[2]/div[3]/span/div[1]/div[2]/div/div[2]/div[3]').text
+
             zipCode = int(zipInput[-6:])
             print(zipCode)
             zpCdList.append(zipCode)
+            
             driver.find_element_by_xpath('/html/body/div/div[2]/div[9]/div[3]/div[2]/div[3]/span/div[1]/div[2]/div/div[2]/div[4]/a[1]').click()
             if WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div[2]/div[2]/div/div/div[2]/div[4]/div/div[8]/div[2]"))).text != "-":    
                 yearBuilt = int(WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[1]/div[2]/div[2]/div/div/div[2]/div[4]/div/div[8]/div[2]"))).text)
@@ -156,7 +153,7 @@ class SLAuto:
 
 
 if __name__ == "__main__":
-    dataSFPath = 'Assessor_Historical_Secured_Property_Tax_Rolls.csv'
+    dataSFPath = '/Users/ethanherring/Desktop/Assessor_Historical_Secured_Property_Tax_Rolls.csv'
     p = readData(dataSFPath)
     dataSF = p.getSFData(dataSFPath)
     print("length of addresses before filter: ", len(dataSF['Parcel Number']))
